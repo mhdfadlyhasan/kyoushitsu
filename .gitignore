@@ -1,0 +1,10 @@
+# SQLite database (local dev)
+backend/study-companion.db
+backend/study-companion.db-*
+
+# Go build artifacts
+backend/server
+backend/bin/
+
+# OS
+.DS_Store
