@@ -42,6 +42,8 @@ admins; there is no public self-registration.
 - There is no public registration. All other users are created by admins.
 - User logs in with email + password, gets a JWT.
 - `/me` returns identity + role. Role gates all UI and API access.
+- Logout is client-side: the client discards the JWT. There is no server-side
+  revocation in v1.
 
 ### 2. Admin manages users
 - Admin opens "Users", creates a teacher or student with name, email, initial
@@ -136,6 +138,8 @@ Notes:
 - `GET  /api/me` → current user
 - No public registration. The single super admin is seeded from
   `SUPERADMIN_EMAIL` / `SUPERADMIN_PASSWORD` on first boot.
+- Logout is client-side only: the client discards its token. v1 has no
+  server-side revocation and no logout endpoint.
 
 ### Admin (super admin + admin)
 - `GET    /api/admin/users` → list users

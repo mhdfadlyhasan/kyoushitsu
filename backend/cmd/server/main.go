@@ -24,7 +24,7 @@ func main() {
 
 	srv := &http.Server{
 		Addr:    cfg.Addr,
-		Handler: handler.New(),
+		Handler: handler.New(st, cfg.JWTSecret),
 	}
 
 	log.Printf("study-companion listening on %s (db=%s)", cfg.Addr, cfg.DBPath)

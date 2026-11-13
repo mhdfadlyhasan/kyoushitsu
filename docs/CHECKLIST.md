@@ -18,14 +18,16 @@ Tasks:
 - [x] bcrypt hash/verify helper.
 - [x] JWT issue/verify + auth middleware.
 - [x] Role guard middleware usable on routes.
-- [ ] `POST /api/auth/login`, `GET /api/me`.
+- [x] `POST /api/auth/login`, `GET /api/me`.
 - [ ] Seed super admin on boot only if no super admin exists.
 - [ ] Frontend login screen, token persistence, role-aware shell.
+- [ ] Frontend logout clears the stored token (client-side; no server revocation in v1).
 
 Acceptance:
-- [ ] Valid credentials → `{token, user}`; invalid → 401.
-- [ ] `/me` without/invalid token → 401; with token → identity + role.
-- [ ] No public registration endpoint exists.
+- [x] Valid credentials → `{token, user}`; invalid → 401.
+- [x] `/me` without/invalid token → 401; with token → identity + role.
+- [x] No public registration endpoint exists.
+- [ ] After logout, protected calls return 401 (token removed client-side).
 - [ ] Restarting does not duplicate the super admin.
 - [ ] Protected routes reject missing role.
 
