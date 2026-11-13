@@ -16,7 +16,7 @@ Tasks:
 - [x] Add `SUPERADMIN_EMAIL` / `SUPERADMIN_PASSWORD` to config.
 - [x] `users` table + migration with role check (`super_admin|admin|teacher|student`).
 - [x] bcrypt hash/verify helper.
-- [ ] JWT issue/verify + auth middleware.
+- [x] JWT issue/verify + auth middleware.
 - [ ] Role guard middleware usable on routes.
 - [ ] `POST /api/auth/login`, `GET /api/me`.
 - [ ] Seed super admin on boot only if no super admin exists.
