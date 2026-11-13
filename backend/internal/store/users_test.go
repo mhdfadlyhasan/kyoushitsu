@@ -40,6 +40,40 @@ func TestGetUserByEmailAndID(t *testing.T) {
 	}
 }
 
+func TestEmailIsCaseInsensitive(t *testing.T) {
+	st := openTestStore(t)
+
+	_, err := st.DB.Exec(
+		`INSERT INTO users (name, email, password_hash, role) VALUES (?, ?, ?, ?)`,
+		"Ana", "Ana@Example.com", "hash", "teacher",
+	)
+	if err != nil {
+		t.Fatalf("insert user: %v", err)
+	}
+
+	user, err := st.GetUserByEmail(" ana@EXAMPLE.com ")
+	if err != nil {
+		t.Fatalf("GetUserByEmail: %v", err)
+	}
+	if user.Email != "Ana@Example.com" {
+		t.Fatalf("email = %q, want Ana@Example.com", user.Email)
+	}
+
+	_, err = st.DB.Exec(
+		`INSERT INTO users (name, email, password_hash, role) VALUES (?, ?, ?, ?)`,
+		"Other", "ana@example.com", "hash", "student",
+	)
+	if err == nil {
+		t.Fatal("expected case-insensitive duplicate email to be rejected")
+	}
+}
+
+func TestNormalizeEmail(t *testing.T) {
+	if got := NormalizeEmail("  Ana@Example.COM "); got != "ana@example.com" {
+		t.Fatalf("NormalizeEmail = %q, want ana@example.com", got)
+	}
+}
+
 func TestGetUserNotFound(t *testing.T) {
 	st := openTestStore(t)
 

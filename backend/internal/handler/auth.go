@@ -5,14 +5,13 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/mhdfadlyhasan/study-companion/internal/auth"
 	"github.com/mhdfadlyhasan/study-companion/internal/store"
 )
 
-const tokenTTL = 24 * time.Hour
+const tokenTTL = 3 * time.Hour
 
 type loginRequest struct {
 	Email    string `json:"email"`
@@ -31,7 +30,7 @@ func (h *handler) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	email := strings.TrimSpace(req.Email)
+	email := store.NormalizeEmail(req.Email)
 	if email == "" || req.Password == "" {
 		writeError(w, http.StatusBadRequest, "email and password are required")
 		return

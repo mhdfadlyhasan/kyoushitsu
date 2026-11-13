@@ -23,10 +23,14 @@ type User struct {
 
 const userColumns = `id, name, email, password_hash, role, created_at`
 
-// GetUserByEmail returns the user with the given email.
+// NormalizeEmail canonicalizes an email for storage and lookup.
+func NormalizeEmail(email string) string {
+	return strings.ToLower(strings.TrimSpace(email))
+}
+
+// GetUserByEmail returns the user with the given email, case-insensitively.
 func (s *Store) GetUserByEmail(email string) (*User, error) {
-	email = strings.ToLower(strings.TrimSpace(email))
-	return s.getUser(`SELECT `+userColumns+` FROM users WHERE email = ?`, email)
+	return s.getUser(`SELECT `+userColumns+` FROM users WHERE lower(email) = ?`, NormalizeEmail(email))
 }
 
 // GetUserByID returns the user with the given id.
