@@ -18,6 +18,10 @@ func main() {
 	}
 	defer st.Close()
 
+	if err := st.Migrate(); err != nil {
+		log.Fatalf("migrate store: %v", err)
+	}
+
 	srv := &http.Server{
 		Addr:    cfg.Addr,
 		Handler: handler.New(),
