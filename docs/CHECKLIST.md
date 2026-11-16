@@ -9,7 +9,7 @@ Config: `ADDR`, `DB_PATH`, `JWT_SECRET`, `SUPERADMIN_EMAIL`, `SUPERADMIN_PASSWOR
 ## 1. Auth + roles + super-admin seed
 
 **Goal:** users log in, receive a JWT, and every endpoint is role-gated; exactly
-one super admin is seeded on first boot.
+one super admin is created via the seed CLI.
 **Depends:** none.
 
 Tasks:
@@ -19,7 +19,7 @@ Tasks:
 - [x] JWT issue/verify + auth middleware.
 - [x] Role guard middleware usable on routes.
 - [x] `POST /api/auth/login`, `GET /api/me`.
-- [ ] Seed super admin on boot only if no super admin exists.
+- [x] `seed-superadmin` command creates the super admin only if none exists (no boot writes).
 - [ ] Frontend login screen, token persistence, role-aware shell.
 - [ ] Frontend logout clears the stored token (client-side; no server revocation in v1).
 
@@ -28,10 +28,10 @@ Acceptance:
 - [x] `/me` without/invalid token → 401; with token → identity + role.
 - [x] No public registration endpoint exists.
 - [ ] After logout, protected calls return 401 (token removed client-side).
-- [ ] Restarting does not duplicate the super admin.
-- [ ] Protected routes reject missing role.
+- [x] Re-running the seed command does not duplicate the super admin.
+- [x] Protected routes reject missing role.
 
-Verify: `cd backend && go build ./... && go vet ./...`; `cd frontend && npm run build && npm run lint`; manual login + `/me` + restart.
+Verify: `cd backend && go build ./... && go vet ./...`; `cd frontend && npm run build && npm run lint`; manual `seed-superadmin` + login + `/me`.
 
 ## 2. Admin user management
 

@@ -84,3 +84,39 @@ func TestGetUserNotFound(t *testing.T) {
 		t.Fatalf("GetUserByID error = %v, want ErrNotFound", err)
 	}
 }
+
+func TestCreateSuperAdminIfNoneIsIdempotent(t *testing.T) {
+	st := openTestStore(t)
+
+	created, err := st.CreateSuperAdminIfNone("Super Admin", "owner@example.com", "hash")
+	if err != nil {
+		t.Fatalf("CreateSuperAdminIfNone: %v", err)
+	}
+	if !created {
+		t.Fatal("expected first seed to create the super admin")
+	}
+
+	created, err = st.CreateSuperAdminIfNone("Second Owner", "other@example.com", "hash")
+	if err != nil {
+		t.Fatalf("second CreateSuperAdminIfNone: %v", err)
+	}
+	if created {
+		t.Fatal("expected second seed to be a no-op")
+	}
+
+	var count int
+	if err := st.DB.QueryRow(`SELECT COUNT(*) FROM users WHERE role = 'super_admin'`).Scan(&count); err != nil {
+		t.Fatalf("count super admins: %v", err)
+	}
+	if count != 1 {
+		t.Fatalf("super admin count = %d, want 1", count)
+	}
+
+	exists, err := st.HasSuperAdmin()
+	if err != nil {
+		t.Fatalf("HasSuperAdmin: %v", err)
+	}
+	if !exists {
+		t.Fatal("HasSuperAdmin = false, want true")
+	}
+}
