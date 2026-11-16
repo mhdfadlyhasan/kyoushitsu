@@ -38,6 +38,34 @@ func (s *Store) GetUserByID(id int64) (*User, error) {
 	return s.getUser(`SELECT `+userColumns+` FROM users WHERE id = ?`, id)
 }
 
+// HasSuperAdmin reports whether a super admin account already exists.
+func (s *Store) HasSuperAdmin() (bool, error) {
+	var count int
+	if err := s.DB.QueryRow(`SELECT COUNT(*) FROM users WHERE role = 'super_admin'`).Scan(&count); err != nil {
+		return false, fmt.Errorf("count super admins: %w", err)
+	}
+	return count > 0, nil
+}
+
+// CreateSuperAdminIfNone inserts a super admin only when no super admin exists.
+// It reports whether a row was created.
+func (s *Store) CreateSuperAdminIfNone(name, email, passwordHash string) (bool, error) {
+	res, err := s.DB.Exec(
+		`INSERT INTO users (name, email, password_hash, role)
+		 SELECT ?, ?, ?, 'super_admin'
+		 WHERE NOT EXISTS (SELECT 1 FROM users WHERE role = 'super_admin')`,
+		name, NormalizeEmail(email), passwordHash,
+	)
+	if err != nil {
+		return false, fmt.Errorf("seed super admin: %w", err)
+	}
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return false, fmt.Errorf("seed super admin rows: %w", err)
+	}
+	return affected > 0, nil
+}
+
 func (s *Store) getUser(query string, arg any) (*User, error) {
 	var (
 		user      User

@@ -37,8 +37,11 @@ admins; there is no public self-registration.
 ## 3. User flows
 
 ### 1. Login / bootstrap
-- On first boot the server seeds one super admin from `SUPERADMIN_EMAIL` and
-  `SUPERADMIN_PASSWORD` if no super admin exists.
+- An operator creates the single super admin with the explicit
+  `seed-superadmin` CLI command, reading `SUPERADMIN_EMAIL` and
+  `SUPERADMIN_PASSWORD`. Normal server boot never writes users.
+- The seed command is idempotent: it does nothing if a super admin already
+  exists.
 - There is no public registration. All other users are created by admins.
 - User logs in with email + password, gets a JWT.
 - `/me` returns identity + role. Role gates all UI and API access.
@@ -128,16 +131,17 @@ Notes:
 - Notes are text-only and persisted per session; late joiners and history read them.
 - Student submissions are PNG snapshots (`canvas.toDataURL()`) relayed live to the
   teacher over WebSocket and **not stored** — there is no `submissions` table.
-- One super admin is seeded from env on first boot; all other users are created by
-  admins or the super admin.
+- One super admin is created with the explicit `seed-superadmin` CLI command;
+  all other users are created by admins or the super admin.
 
 ## 6. API + WebSocket
 
 ### Auth (JWT in `Authorization: Bearer`)
 - `POST /api/auth/login` `{email,password}` → `{token, user}`
 - `GET  /api/me` → current user
-- No public registration. The single super admin is seeded from
-  `SUPERADMIN_EMAIL` / `SUPERADMIN_PASSWORD` on first boot.
+- No public registration. The single super admin is created with the
+  `seed-superadmin` CLI command from `SUPERADMIN_EMAIL` /
+  `SUPERADMIN_PASSWORD`; normal boot never seeds.
 - Logout is client-side only: the client discards its token. v1 has no
   server-side revocation and no logout endpoint.
 
@@ -206,12 +210,12 @@ Risks:
 3. **WS auth & reconnect** — authenticate the socket and handle drop/reconnect.
 4. **Ephemeral submissions** — if the teacher is offline or disconnected, the
    submission is lost; keep the live feed clearly best-effort.
-5. **Super admin seeding** — read credentials from env and never commit a real
-   password; seed only when no super admin exists.
+5. **Super admin seeding** — the explicit CLI reads credentials from env, never
+   commits a real password, and is idempotent (no writes if a super admin exists).
 
 ## 9. Build order
 
-1. Auth (JWT + roles) + super-admin seed
+1. Auth (JWT + roles) + super-admin seed CLI
 2. Admin user management
 3. Class + join code
 4. Session lifecycle (`scheduled` → `live` → `ended`)

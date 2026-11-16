@@ -33,13 +33,26 @@ go run ./cmd/server
 # listens on :8080, creates study-companion.db in backend/
 ```
 
-Config via env vars (all optional):
+Create the super admin (once, before first login):
+
+```sh
+cd backend
+SUPERADMIN_EMAIL=owner@example.com SUPERADMIN_PASSWORD=change-me \
+  go run ./cmd/server seed-superadmin
+```
+
+The command is idempotent: it does nothing if a super admin already exists.
+Normal server boot never writes users.
+
+Config via env vars (defaults apply):
 
 | Var | Default | Purpose |
 |---|---|---|
 | `ADDR` | `:8080` | HTTP listen address |
 | `DB_PATH` | `study-companion.db` | SQLite file path |
 | `JWT_SECRET` | `dev-secret-change-me` | JWT signing secret (change in prod) |
+| `SUPERADMIN_EMAIL` | — | Super admin email used by `seed-superadmin` |
+| `SUPERADMIN_PASSWORD` | — | Super admin password (hashed at seed time) |
 
 Health check: `curl http://localhost:8080/healthz` → `ok`
 
