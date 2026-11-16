@@ -20,14 +20,14 @@ Tasks:
 - [x] Role guard middleware usable on routes.
 - [x] `POST /api/auth/login`, `GET /api/me`.
 - [x] `seed-superadmin` command creates the super admin only if none exists (no boot writes).
-- [ ] Frontend login screen, token persistence, role-aware shell.
-- [ ] Frontend logout clears the stored token (client-side; no server revocation in v1).
+- [x] Frontend login screen, token persistence, role-aware shell.
+- [x] Frontend logout clears the stored token (client-side; no server revocation in v1).
 
 Acceptance:
 - [x] Valid credentials → `{token, user}`; invalid → 401.
 - [x] `/me` without/invalid token → 401; with token → identity + role.
 - [x] No public registration endpoint exists.
-- [ ] After logout, protected calls return 401 (token removed client-side).
+- [x] After logout, protected calls return 401 (token removed client-side).
 - [x] Re-running the seed command does not duplicate the super admin.
 - [x] Protected routes reject missing role.
 

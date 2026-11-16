@@ -109,3 +109,11 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+
+.app-loading {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+}
