@@ -2,5 +2,8 @@
 backend/server
 backend/bin/
 
+# Local env
+.env
+
 # OS
 .DS_Store

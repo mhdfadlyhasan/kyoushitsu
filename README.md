@@ -78,6 +78,14 @@ The Vite dev server proxies `/api` (including WebSockets) to `http://localhost:8
 
 ## Scripts
 
+Convenience targets (copy `.env.example` to `.env` to override `DATABASE_URL`):
+
+```sh
+make run             # backend on :8080
+make build vet test  # backend checks
+make seed-superadmin # super admin CLI
+```
+
 ```sh
 # backend
 cd backend && go build ./... && go vet ./...
