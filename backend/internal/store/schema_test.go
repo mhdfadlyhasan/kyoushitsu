@@ -1,14 +1,15 @@
 package store
 
 import (
-	"path/filepath"
 	"testing"
+
+	"github.com/mhdfadlyhasan/study-companion/internal/testsupport"
 )
 
 func openTestStore(t *testing.T) *Store {
 	t.Helper()
 
-	st, err := Open(filepath.Join(t.TempDir(), "test.db"))
+	st, err := Open(testsupport.PostgresURL(t))
 	if err != nil {
 		t.Fatalf("Open: %v", err)
 	}
@@ -28,7 +29,7 @@ func TestMigrateUsersTable(t *testing.T) {
 	}
 
 	_, err := st.DB.Exec(
-		`INSERT INTO users (name, email, password_hash, role) VALUES (?, ?, ?, ?)`,
+		`INSERT INTO users (name, email, password_hash, role) VALUES ($1, $2, $3, $4)`,
 		"Alice", "alice@example.com", "hash", "teacher",
 	)
 	if err != nil {
@@ -36,7 +37,7 @@ func TestMigrateUsersTable(t *testing.T) {
 	}
 
 	_, err = st.DB.Exec(
-		`INSERT INTO users (name, email, password_hash, role) VALUES (?, ?, ?, ?)`,
+		`INSERT INTO users (name, email, password_hash, role) VALUES ($1, $2, $3, $4)`,
 		"Bob", "bob@example.com", "hash", "owner",
 	)
 	if err == nil {
@@ -44,7 +45,7 @@ func TestMigrateUsersTable(t *testing.T) {
 	}
 
 	_, err = st.DB.Exec(
-		`INSERT INTO users (name, email, password_hash, role) VALUES (?, ?, ?, ?)`,
+		`INSERT INTO users (name, email, password_hash, role) VALUES ($1, $2, $3, $4)`,
 		"Duplicate", "alice@example.com", "hash", "student",
 	)
 	if err == nil {

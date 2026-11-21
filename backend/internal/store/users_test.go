@@ -8,16 +8,13 @@ import (
 func TestGetUserByEmailAndID(t *testing.T) {
 	st := openTestStore(t)
 
-	res, err := st.DB.Exec(
-		`INSERT INTO users (name, email, password_hash, role) VALUES (?, ?, ?, ?)`,
+	var id int64
+	err := st.DB.QueryRow(
+		`INSERT INTO users (name, email, password_hash, role) VALUES ($1, $2, $3, $4) RETURNING id`,
 		"Ana", "ana@example.com", "hash", "teacher",
-	)
+	).Scan(&id)
 	if err != nil {
 		t.Fatalf("insert user: %v", err)
-	}
-	id, err := res.LastInsertId()
-	if err != nil {
-		t.Fatalf("last insert id: %v", err)
 	}
 
 	byEmail, err := st.GetUserByEmail("  ANA@example.com ")
@@ -44,7 +41,7 @@ func TestEmailIsCaseInsensitive(t *testing.T) {
 	st := openTestStore(t)
 
 	_, err := st.DB.Exec(
-		`INSERT INTO users (name, email, password_hash, role) VALUES (?, ?, ?, ?)`,
+		`INSERT INTO users (name, email, password_hash, role) VALUES ($1, $2, $3, $4)`,
 		"Ana", "Ana@Example.com", "hash", "teacher",
 	)
 	if err != nil {
@@ -60,7 +57,7 @@ func TestEmailIsCaseInsensitive(t *testing.T) {
 	}
 
 	_, err = st.DB.Exec(
-		`INSERT INTO users (name, email, password_hash, role) VALUES (?, ?, ?, ?)`,
+		`INSERT INTO users (name, email, password_hash, role) VALUES ($1, $2, $3, $4)`,
 		"Other", "ana@example.com", "hash", "student",
 	)
 	if err == nil {

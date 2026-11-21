@@ -30,7 +30,7 @@ frontend/       React + Vite + TypeScript
 docs/           DESIGN.md (source of truth), CHECKLIST.md (build tracking)
 ```
 
-Stack: Go (`chi`, `gorilla/websocket`, `golang-jwt`, `modernc.org/sqlite`,
+Stack: Go (`chi`, `gorilla/websocket`, `golang-jwt`, `pgx`, PostgreSQL,
 `bcrypt`) and React 19 + Vite + TS. Board drawing uses plain `<canvas>` +
 Pointer Events, with `perfect-freehand` for ink.
 
@@ -48,7 +48,7 @@ cd frontend && npm run dev
 ```
 
 Run the relevant build/lint/typecheck before finishing. Backend config comes from
-`ADDR`, `DB_PATH`, `JWT_SECRET`, `SUPERADMIN_EMAIL`, `SUPERADMIN_PASSWORD`
+`ADDR`, `DATABASE_URL`, `JWT_SECRET`, `SUPERADMIN_EMAIL`, `SUPERADMIN_PASSWORD`
 (see README).
 
 ## Conventions

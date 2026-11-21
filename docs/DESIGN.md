@@ -117,7 +117,7 @@ Admin — Users
 +--------------------------------------------------+
 ```
 
-## 5. Data model (SQLite)
+## 5. Data model (PostgreSQL)
 
 | Table           | Columns                                                                                              |
 | --------------- | ---------------------------------------------------------------------------------------------------- |
@@ -199,7 +199,7 @@ Notes:
 
 | Concern  | Choice                                                                       | Risk / mitigation                                                            |
 | -------- | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| Backend  | Go, `chi`, `gorilla/websocket`, `golang-jwt`, `modernc.org/sqlite`, `bcrypt` | SQLite single-file is fine for MVP; swap to Postgres via an interface later. |
+| Backend  | Go, `chi`, `gorilla/websocket`, `golang-jwt`, `pgx`, PostgreSQL, `bcrypt` | Postgres via `DATABASE_URL`; run one instance for all environments. |
 | Frontend | React + Vite + TS, plain `<canvas>` + Pointer Events                         | Touch support handled by Pointer Events (no extra lib).                      |
 | Auth     | JWT (short-lived) + bcrypt                                                   | Rotate secret via env; add refresh later if needed.                          |
 | Realtime | WebSocket for note push (teacher→students) and submission relay (student→teacher) | Two directions, both session-scoped; submissions are best-effort. |
@@ -230,5 +230,4 @@ Planning feature + heavy ai usage
 2. Quiz feature, quiz maker, quiz answer, ai generated quiz based on teacher input
 3. Student performance
 4. note type (capability of integration to anki)
-5. postgres database
 

@@ -52,7 +52,7 @@ func runServer() {
 		Handler: handler.New(st, cfg.JWTSecret),
 	}
 
-	log.Printf("study-companion listening on %s (db=%s)", cfg.Addr, cfg.DBPath)
+	log.Printf("study-companion listening on %s (db=postgres)", cfg.Addr)
 	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Fatalf("server: %v", err)
 	}
@@ -97,7 +97,7 @@ func runSeedSuperAdmin() error {
 }
 
 func openMigratedStore(cfg config.Config) (*store.Store, error) {
-	st, err := store.Open(cfg.DBPath)
+	st, err := store.Open(cfg.DatabaseURL)
 	if err != nil {
 		return nil, fmt.Errorf("open store: %w", err)
 	}

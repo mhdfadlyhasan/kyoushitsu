@@ -4,7 +4,7 @@ Tracks the build order in [DESIGN.md](DESIGN.md). The design doc is the source o
 truth; this file is for tracking and verification only. Tick boxes as work lands.
 
 Roles: `super_admin`, `admin`, `teacher`, `student`.
-Config: `ADDR`, `DB_PATH`, `JWT_SECRET`, `SUPERADMIN_EMAIL`, `SUPERADMIN_PASSWORD`.
+Config: `ADDR`, `DATABASE_URL`, `JWT_SECRET`, `SUPERADMIN_EMAIL`, `SUPERADMIN_PASSWORD`.
 
 ## 1. Auth + roles + super-admin seed
 

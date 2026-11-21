@@ -5,19 +5,19 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"path/filepath"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/mhdfadlyhasan/study-companion/internal/auth"
 	"github.com/mhdfadlyhasan/study-companion/internal/store"
+	"github.com/mhdfadlyhasan/study-companion/internal/testsupport"
 )
 
 func newTestRouter(t *testing.T) (*store.Store, http.Handler) {
 	t.Helper()
 
-	st, err := store.Open(filepath.Join(t.TempDir(), "test.db"))
+	st, err := store.Open(testsupport.PostgresURL(t))
 	if err != nil {
 		t.Fatalf("Open: %v", err)
 	}
@@ -36,16 +36,13 @@ func insertUser(t *testing.T, st *store.Store, name, email, password, role strin
 	if err != nil {
 		t.Fatalf("HashPassword: %v", err)
 	}
-	res, err := st.DB.Exec(
-		`INSERT INTO users (name, email, password_hash, role) VALUES (?, ?, ?, ?)`,
+	var id int64
+	err = st.DB.QueryRow(
+		`INSERT INTO users (name, email, password_hash, role) VALUES ($1, $2, $3, $4) RETURNING id`,
 		name, email, hash, role,
-	)
+	).Scan(&id)
 	if err != nil {
 		t.Fatalf("insert user: %v", err)
-	}
-	id, err := res.LastInsertId()
-	if err != nil {
-		t.Fatalf("last insert id: %v", err)
 	}
 	return id
 }

@@ -7,7 +7,7 @@ import (
 // Config holds runtime configuration, sourced from environment variables.
 type Config struct {
 	Addr               string // HTTP listen address, e.g. ":8080"
-	DBPath             string // SQLite database file path
+	DatabaseURL        string // PostgreSQL connection string
 	JWTSecret          string // Secret used to sign JWTs
 	SuperadminEmail    string // Email of the seeded super admin
 	SuperadminPassword string // Plaintext super admin password, hashed at seed time
@@ -18,7 +18,7 @@ type Config struct {
 func Load() Config {
 	return Config{
 		Addr:               getenv("ADDR", ":8080"),
-		DBPath:             getenv("DB_PATH", "study-companion.db"),
+		DatabaseURL:        getenv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/study_companion?sslmode=disable"),
 		JWTSecret:          getenv("JWT_SECRET", "dev-secret-change-me"),
 		SuperadminEmail:    getenv("SUPERADMIN_EMAIL", ""),
 		SuperadminPassword: getenv("SUPERADMIN_PASSWORD", ""),

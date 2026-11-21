@@ -6,7 +6,7 @@ See **[docs/DESIGN.md](docs/DESIGN.md)** for the design doc (source of truth).
 
 ## Stack
 
-- **Backend:** Go (`chi`, `gorilla/websocket`, `golang-jwt`, `modernc.org/sqlite`)
+- **Backend:** Go (`chi`, `gorilla/websocket`, `golang-jwt`, `pgx`, PostgreSQL)
 - **Frontend:** React + Vite + TypeScript (plain `<canvas>` for drawing)
 
 ## Layout
@@ -24,13 +24,22 @@ docs/           DESIGN.md and other docs
 
 - Go 1.26+
 - Node 20+ and npm
+- PostgreSQL 16+ (or Docker for the bundled `docker-compose.yml`)
 
 ## Run the backend
+
+Start PostgreSQL (creates the `study_companion` database):
+
+```sh
+docker compose up -d
+```
+
+Then run the API:
 
 ```sh
 cd backend
 go run ./cmd/server
-# listens on :8080, creates study-companion.db in backend/
+# listens on :8080, connects to DATABASE_URL
 ```
 
 Create the super admin (once, before first login):
@@ -49,7 +58,7 @@ Config via env vars (defaults apply):
 | Var | Default | Purpose |
 |---|---|---|
 | `ADDR` | `:8080` | HTTP listen address |
-| `DB_PATH` | `study-companion.db` | SQLite file path |
+| `DATABASE_URL` | `postgres://postgres:postgres@localhost:5432/study_companion?sslmode=disable` | PostgreSQL connection string |
 | `JWT_SECRET` | `dev-secret-change-me` | JWT signing secret (change in prod) |
 | `SUPERADMIN_EMAIL` | — | Super admin email used by `seed-superadmin` |
 | `SUPERADMIN_PASSWORD` | — | Super admin password (hashed at seed time) |
@@ -72,6 +81,9 @@ The Vite dev server proxies `/api` (including WebSockets) to `http://localhost:8
 ```sh
 # backend
 cd backend && go build ./... && go vet ./...
+
+# backend tests (database-backed tests are skipped without TEST_DATABASE_URL)
+cd backend && TEST_DATABASE_URL='postgres://postgres:postgres@localhost:5432/study_companion?sslmode=disable' go test ./...
 
 # frontend
 cd frontend && npm run build && npm run lint

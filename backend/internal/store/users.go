@@ -30,12 +30,12 @@ func NormalizeEmail(email string) string {
 
 // GetUserByEmail returns the user with the given email, case-insensitively.
 func (s *Store) GetUserByEmail(email string) (*User, error) {
-	return s.getUser(`SELECT `+userColumns+` FROM users WHERE lower(email) = ?`, NormalizeEmail(email))
+	return s.getUser(`SELECT `+userColumns+` FROM users WHERE lower(email) = $1`, NormalizeEmail(email))
 }
 
 // GetUserByID returns the user with the given id.
 func (s *Store) GetUserByID(id int64) (*User, error) {
-	return s.getUser(`SELECT `+userColumns+` FROM users WHERE id = ?`, id)
+	return s.getUser(`SELECT `+userColumns+` FROM users WHERE id = $1`, id)
 }
 
 // HasSuperAdmin reports whether a super admin account already exists.
@@ -52,7 +52,7 @@ func (s *Store) HasSuperAdmin() (bool, error) {
 func (s *Store) CreateSuperAdminIfNone(name, email, passwordHash string) (bool, error) {
 	res, err := s.DB.Exec(
 		`INSERT INTO users (name, email, password_hash, role)
-		 SELECT ?, ?, ?, 'super_admin'
+		 SELECT $1, $2, $3, 'super_admin'
 		 WHERE NOT EXISTS (SELECT 1 FROM users WHERE role = 'super_admin')`,
 		name, NormalizeEmail(email), passwordHash,
 	)
@@ -67,13 +67,10 @@ func (s *Store) CreateSuperAdminIfNone(name, email, passwordHash string) (bool, 
 }
 
 func (s *Store) getUser(query string, arg any) (*User, error) {
-	var (
-		user      User
-		createdAt string
-	)
+	var user User
 
 	err := s.DB.QueryRow(query, arg).Scan(
-		&user.ID, &user.Name, &user.Email, &user.PasswordHash, &user.Role, &createdAt,
+		&user.ID, &user.Name, &user.Email, &user.PasswordHash, &user.Role, &user.CreatedAt,
 	)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, ErrNotFound
@@ -82,9 +79,5 @@ func (s *Store) getUser(query string, arg any) (*User, error) {
 		return nil, fmt.Errorf("get user: %w", err)
 	}
 
-	user.CreatedAt, err = time.Parse(time.RFC3339, createdAt)
-	if err != nil {
-		return nil, fmt.Errorf("parse created_at: %w", err)
-	}
 	return &user, nil
 }
