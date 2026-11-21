@@ -1,6 +1,8 @@
-const TOKEN_KEY = 'study-companion.token'
+import type { Role } from './roles'
 
-export type Role = 'super_admin' | 'admin' | 'teacher' | 'student'
+export type { Role }
+
+const TOKEN_KEY = 'study-companion.token'
 
 export type User = {
   id: number

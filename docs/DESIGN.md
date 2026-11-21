@@ -230,4 +230,11 @@ Planning feature + heavy ai usage
 2. Quiz feature, quiz maker, quiz answer, ai generated quiz based on teacher input
 3. Student performance
 4. note type (capability of integration to anki)
+5. Replace admin-set passwords: create users without a password and send a
+   single-use invite / set-password link; later move to passwordless magic link /
+   SSO / OAuth.
+6. Remove `password` from the `POST /api/admin/users` payload once the invite
+   flow in (5) lands.
+7. UX polish: show success feedback (toast/banner) after create, update,
+   password reset, and delete actions.
 

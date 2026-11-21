@@ -40,21 +40,21 @@ creates admins.
 **Depends:** 1.
 
 Tasks:
-- [ ] Store: list, create, get, update, reset password, delete users.
-- [ ] Handlers for `/api/admin/users` (GET, POST, PATCH, DELETE) + password reset.
-- [ ] Enforce role rules: admin → teacher/student only; super admin → admins too.
-- [ ] Reject deleting or demoting the super admin.
-- [ ] Reject duplicate email; always hash passwords.
-- [ ] Frontend Users page: list, create, edit name/role, reset password, delete.
-- [ ] Hide Users nav from teacher/student.
+- [x] Store: list, create, get, update, reset password, delete users.
+- [x] Handlers for `/api/admin/users` (GET, POST, PATCH, DELETE) + password reset.
+- [x] Enforce role rules: admin → teacher/student only; super admin → admins too.
+- [x] Reject deleting or demoting the super admin.
+- [x] Reject duplicate email; always hash passwords.
+- [x] Frontend Users page: list, create, edit name/role, reset password, delete.
+- [x] Hide Users nav from teacher/student.
 
 Acceptance:
-- [ ] Admin can CRUD teacher/student accounts.
-- [ ] Admin cannot create/promote admins or modify the super admin → 403.
-- [ ] Super admin can create admin accounts and any other user.
-- [ ] Super admin cannot be deleted.
-- [ ] Duplicate email → error (4xx).
-- [ ] Teacher/student hitting `/api/admin/*` → 403.
+- [x] Admin can CRUD teacher/student accounts.
+- [x] Admin cannot create/promote admins or modify the super admin → 403.
+- [x] Super admin can create admin accounts and any other user.
+- [x] Super admin cannot be deleted.
+- [x] Duplicate email → error (4xx).
+- [x] Teacher/student hitting `/api/admin/*` → 403.
 
 Verify: role-gate requests as each role; build/vet/lint.
 

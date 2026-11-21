@@ -117,3 +117,75 @@ func TestCreateSuperAdminIfNoneIsIdempotent(t *testing.T) {
 		t.Fatal("HasSuperAdmin = false, want true")
 	}
 }
+
+func TestCreateListUpdateResetDeleteUser(t *testing.T) {
+	st := openTestStore(t)
+
+	created, err := st.CreateUser("Ana", "  ANA@example.com ", "hash", "teacher")
+	if err != nil {
+		t.Fatalf("CreateUser: %v", err)
+	}
+	if created.ID == 0 || created.Email != "ana@example.com" || created.Role != "teacher" {
+		t.Fatalf("created = %+v, want normalized teacher", created)
+	}
+
+	list, err := st.ListUsers()
+	if err != nil {
+		t.Fatalf("ListUsers: %v", err)
+	}
+	if len(list) != 1 || list[0].ID != created.ID {
+		t.Fatalf("list = %+v, want one user %d", list, created.ID)
+	}
+
+	updated, err := st.UpdateUser(created.ID, "Ana B", "student")
+	if err != nil {
+		t.Fatalf("UpdateUser: %v", err)
+	}
+	if updated.Name != "Ana B" || updated.Role != "student" {
+		t.Fatalf("updated = %+v, want name/role changed", updated)
+	}
+
+	if err := st.ResetUserPassword(created.ID, "newhash"); err != nil {
+		t.Fatalf("ResetUserPassword: %v", err)
+	}
+	reloaded, err := st.GetUserByID(created.ID)
+	if err != nil {
+		t.Fatalf("GetUserByID: %v", err)
+	}
+	if reloaded.PasswordHash != "newhash" {
+		t.Fatalf("password hash = %q, want newhash", reloaded.PasswordHash)
+	}
+
+	if err := st.DeleteUser(created.ID); err != nil {
+		t.Fatalf("DeleteUser: %v", err)
+	}
+	if _, err := st.GetUserByID(created.ID); !errors.Is(err, ErrNotFound) {
+		t.Fatalf("GetUserByID after delete = %v, want ErrNotFound", err)
+	}
+}
+
+func TestCreateUserDuplicateEmail(t *testing.T) {
+	st := openTestStore(t)
+
+	if _, err := st.CreateUser("Ana", "ana@example.com", "hash", "teacher"); err != nil {
+		t.Fatalf("CreateUser: %v", err)
+	}
+	_, err := st.CreateUser("Other", "ANA@example.com", "hash", "student")
+	if !errors.Is(err, ErrDuplicateEmail) {
+		t.Fatalf("duplicate CreateUser error = %v, want ErrDuplicateEmail", err)
+	}
+}
+
+func TestUserMutationsNotFound(t *testing.T) {
+	st := openTestStore(t)
+
+	if _, err := st.UpdateUser(999, "Nobody", "student"); !errors.Is(err, ErrNotFound) {
+		t.Fatalf("UpdateUser error = %v, want ErrNotFound", err)
+	}
+	if err := st.ResetUserPassword(999, "hash"); !errors.Is(err, ErrNotFound) {
+		t.Fatalf("ResetUserPassword error = %v, want ErrNotFound", err)
+	}
+	if err := st.DeleteUser(999); !errors.Is(err, ErrNotFound) {
+		t.Fatalf("DeleteUser error = %v, want ErrNotFound", err)
+	}
+}

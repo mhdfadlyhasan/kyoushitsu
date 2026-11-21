@@ -38,6 +38,15 @@ func New(st *store.Store, jwtSecret string) http.Handler {
 		r.Group(func(r chi.Router) {
 			r.Use(auth.Authenticate(jwtSecret))
 			r.Get("/me", h.me)
+
+			r.Route("/admin", func(r chi.Router) {
+				r.Use(auth.RequireRole(auth.RoleSuperAdmin, auth.RoleAdmin))
+				r.Get("/users", h.listUsers)
+				r.Post("/users", h.createUser)
+				r.Patch("/users/{id}", h.updateUser)
+				r.Post("/users/{id}/password", h.resetUserPassword)
+				r.Delete("/users/{id}", h.deleteUser)
+			})
 		})
 	})
 

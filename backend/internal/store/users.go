@@ -6,10 +6,15 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 // ErrNotFound is returned when a requested record does not exist.
 var ErrNotFound = errors.New("not found")
+
+// ErrDuplicateEmail is returned when an email is already in use.
+var ErrDuplicateEmail = errors.New("duplicate email")
 
 // User is an application account.
 type User struct {
@@ -64,6 +69,101 @@ func (s *Store) CreateSuperAdminIfNone(name, email, passwordHash string) (bool, 
 		return false, fmt.Errorf("seed super admin rows: %w", err)
 	}
 	return affected > 0, nil
+}
+
+// ListUsers returns all users ordered by creation time.
+func (s *Store) ListUsers() ([]*User, error) {
+	rows, err := s.DB.Query(`SELECT ` + userColumns + ` FROM users ORDER BY created_at, id`)
+	if err != nil {
+		return nil, fmt.Errorf("list users: %w", err)
+	}
+	defer rows.Close()
+
+	users := make([]*User, 0)
+	for rows.Next() {
+		var user User
+		if err := rows.Scan(
+			&user.ID, &user.Name, &user.Email, &user.PasswordHash, &user.Role, &user.CreatedAt,
+		); err != nil {
+			return nil, fmt.Errorf("scan user: %w", err)
+		}
+		users = append(users, &user)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("list users: %w", err)
+	}
+	return users, nil
+}
+
+// CreateUser inserts a new user and returns it.
+func (s *Store) CreateUser(name, email, passwordHash, role string) (*User, error) {
+	var user User
+	err := s.DB.QueryRow(
+		`INSERT INTO users (name, email, password_hash, role)
+		 VALUES ($1, $2, $3, $4)
+		 RETURNING `+userColumns,
+		name, NormalizeEmail(email), passwordHash, role,
+	).Scan(&user.ID, &user.Name, &user.Email, &user.PasswordHash, &user.Role, &user.CreatedAt)
+	if isUniqueViolation(err) {
+		return nil, ErrDuplicateEmail
+	}
+	if err != nil {
+		return nil, fmt.Errorf("create user: %w", err)
+	}
+	return &user, nil
+}
+
+// UpdateUser updates a user's name and role and returns the updated record.
+func (s *Store) UpdateUser(id int64, name, role string) (*User, error) {
+	var user User
+	err := s.DB.QueryRow(
+		`UPDATE users SET name = $2, role = $3 WHERE id = $1 RETURNING `+userColumns,
+		id, name, role,
+	).Scan(&user.ID, &user.Name, &user.Email, &user.PasswordHash, &user.Role, &user.CreatedAt)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, ErrNotFound
+	}
+	if err != nil {
+		return nil, fmt.Errorf("update user: %w", err)
+	}
+	return &user, nil
+}
+
+// ResetUserPassword replaces a user's password hash.
+func (s *Store) ResetUserPassword(id int64, passwordHash string) error {
+	res, err := s.DB.Exec(`UPDATE users SET password_hash = $2 WHERE id = $1`, id, passwordHash)
+	if err != nil {
+		return fmt.Errorf("reset password: %w", err)
+	}
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("reset password rows: %w", err)
+	}
+	if affected == 0 {
+		return ErrNotFound
+	}
+	return nil
+}
+
+// DeleteUser removes a user by id.
+func (s *Store) DeleteUser(id int64) error {
+	res, err := s.DB.Exec(`DELETE FROM users WHERE id = $1`, id)
+	if err != nil {
+		return fmt.Errorf("delete user: %w", err)
+	}
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("delete user rows: %w", err)
+	}
+	if affected == 0 {
+		return ErrNotFound
+	}
+	return nil
+}
+
+func isUniqueViolation(err error) bool {
+	var pgErr *pgconn.PgError
+	return errors.As(err, &pgErr) && pgErr.Code == "23505"
 }
 
 func (s *Store) getUser(query string, arg any) (*User, error) {
